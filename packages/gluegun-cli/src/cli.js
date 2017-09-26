@@ -8,7 +8,7 @@ async function run (argv) {
   const runtime =
     build()
     .brand('gluegun')
-    .loadDefault(`${__dirname}`)
+    .loadDefault(`${__dirname}`, { name: 'gluegun' })
     .defaultCommand('help')
     .token('commandName', 'cliName')
     .token('commandDescription', 'cliDescription')
