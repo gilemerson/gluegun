@@ -12,8 +12,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "coveralls": "2.13.1",
-    "lerna": "2.0.0-rc.4"
+    "coveralls": "2.13.2",
+    "lerna": "2.2.0"
   },
   "dependencies": {}
 }
