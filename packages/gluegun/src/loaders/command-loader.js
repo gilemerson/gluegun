@@ -26,8 +26,6 @@ function loadFromFile (file, options = {}) {
 
   // remember the file
   command.file = file
-  // default name is the name without the file extension
-  command.name = head(split('.', jetpack.inspect(file).name))
   // strip the extension from the end of the commandPath
   command.commandPath = (options.commandPath || last(file.split('/commands/')).split('/'))
     .map((f) => f === `${command.name}.js` ? command.name : f)
@@ -47,11 +45,11 @@ function loadFromFile (file, options = {}) {
   if (valid) {
     command.name = commandModule.name || last(command.commandPath)
     command.description = commandModule.description
-    command.hidden = !!commandModule.hidden
+    command.hidden = isNil(options.hidden) ? !!commandModule.hidden : !!options.hidden
     command.alias = reject(isNil, is(Array, commandModule.alias) ? commandModule.alias : [ commandModule.alias ])
     command.run = commandModule.run
   } else {
-    throw new Error(`Error: Couldn't load command ${command.name} -- needs a "run" property with a function.`)
+    throw new Error(`Error: Couldn't load command ${command.commandPath.join('/')} -- needs a "run" property with a function.`)
   }
 
   return command

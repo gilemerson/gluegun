@@ -11,11 +11,10 @@ test('the gauntlet', t => {
     .src(`${__dirname}/../fixtures/good-plugins/threepack`)
     .plugin(`${__dirname}/../fixtures/good-plugins/simplest`)
     .plugins(`${__dirname}/../fixtures/good-plugins`, { hidden: true })
+    // commands
+    .commonCommands({ help: true, version: true })
     // events
     .on('start', () => {})
-    .on('pluginLoad', context => {})
-    .on('pluginList', context => {})
-    .on('pluginError', context => {})
     .on('commandList', context => {})
     .on('commandLoad', context => {})
     .on('commandStart', context => {})

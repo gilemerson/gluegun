@@ -13,7 +13,7 @@ const toml = require('toml')
  */
 class Builder {
   constructor () {
-    this.loadPlugins = [] // the plugins
+    this.loadPlugins = [] // the plugins to load
     this.events = {} // the events
   }
 
@@ -49,9 +49,6 @@ class Builder {
     // the plugins get loaded last
     this.loadPlugins.forEach(entry => {
       switch (entry.type) {
-        case 'default':
-          runtime.loadDefault(entry.value, entry.options)
-          break
         case 'load':
           runtime.load(entry.value, entry.options)
           break
@@ -87,16 +84,14 @@ class Builder {
   }
 
   /**
-   * Specifies where the default commands and extensions live.
+   * Alias for `.plugin()`
    *
    * @param  {string}  value   The default plugin directory.
    * @param  {Object}  options Additional loading options.
    * @return {Builder}         self.
    */
   src (value, options = {}) {
-    options.name = options.name || this.brand
-    this.loadPlugins.push({ type: 'default', value, options })
-    return this
+    return this.plugin(value, options)
   }
 
   /**

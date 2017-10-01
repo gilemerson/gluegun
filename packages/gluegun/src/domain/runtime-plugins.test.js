@@ -21,7 +21,7 @@ test('hides commands', t => {
     hidden: true
   })
   t.is(r.plugins.length, 1)
-  t.true(r.plugins[0].commands[2].hidden)
+  t.true(r.commands[2].hidden)
 })
 
 test('loadAll ignores bad directories', t => {

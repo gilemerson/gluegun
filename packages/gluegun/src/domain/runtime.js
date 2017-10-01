@@ -126,18 +126,14 @@ class Runtime {
   constructor (brand) {
     this.brand = brand
     this.run = run // awkward because node.js doesn't support async-based class functions yet.
-    this.plugins = []
+    this.plugins = [] // plugins to load
+    this.commands = []
     this.extensions = []
     this.defaults = {}
-    this.defaultPlugin = null
     this.events = {}
     this.config = {}
 
     this.addCoreExtensions()
-  }
-
-  get pluginNames () {
-    return pluck('name', this.plugins)
   }
 
   /**
@@ -176,38 +172,19 @@ class Runtime {
    *
    * @param  {string} directory The directory to load from.
    * @param  {Object} options   Additional loading options.
-   * @return {Plugin}           A plugin.
    */
   load (directory, options = {}) {
     const { brand } = this
 
     const plugin = loadPluginFromDirectory(directory, {
-      brand,
-      hidden: options['hidden'],
-      name: options['name'],
       commandFilePattern: options['commandFilePattern'],
       extensionFilePattern: options['extensionFilePattern']
     })
 
-    this.plugins = append(plugin, this.plugins)
     forEach(
       extension => this.addExtension(extension.name, extension.setup),
       plugin.extensions
     )
-    return plugin
-  }
-
-  /**
-   * Loads a plugin from a directory and sets it as the default.
-   *
-   * @param  {string} directory The directory to load from.
-   * @param  {Object} options   Additional loading options.
-   * @return {Plugin}           A plugin.
-   */
-  loadDefault (directory, options = {}) {
-    const plugin = this.load(directory, options)
-    this.defaultPlugin = plugin
-    return plugin
   }
 
   /**
@@ -226,42 +203,14 @@ class Runtime {
   }
 
   /**
-   * The list of commands registered.
+   * Find the command for this commandPath.
    *
-   * @return {[]} A list of [{plugin, command}]
-   */
-  listCommands () {
-    const commands = []
-    const eachPlugin = plugin => {
-      const eachCommand = command => {
-        commands.push({ plugin, command })
-      }
-      forEach(eachCommand, plugin.commands)
-    }
-    forEach(eachPlugin, this.plugins)
-
-    return commands
-  }
-
-  /**
-   * Find the plugin for this name.
-   *
-   * @param {string} name The name to search through.
-   * @returns {*}         A Plugin otherwise null.
-   */
-  findPlugin (name) {
-    return findByProp('name', name || '', this.plugins)
-  }
-
-  /**
-   * Find the command for this pluginName & commandPath.
-   *
-   * @param {Plugin} plugin           The plugin in which the command lives.
+   * @param {RunContext} context      Context with commands.
    * @param {string[]} commandPath    The command to find.
    * @returns {*}                     A Command otherwise null.
    */
-  findCommand (plugin, commandPath) {
-    if (isNil(plugin) || isNilOrEmpty(plugin.commands)) return null
+  findCommand (context, commandPath) {
+    if (isNilOrEmpty(context.commands)) return null
     if (!commandPath) { commandPath = [] }
 
     // traverse through the command path, retrieving aliases along the way
@@ -285,7 +234,7 @@ class Runtime {
     if (finalCommandPath.length === 0) {
       const defaultCommand = find(
         command => equals(command.commandPath, [ plugin.name ]),
-        plugin.commands
+        context.commands
       )
       return defaultCommand
     }
@@ -293,7 +242,7 @@ class Runtime {
     // looking at the final command path, retrieve the command that matches
     return find(
       command => equals(command.commandPath, finalCommandPath),
-      plugin.commands
+      context.commands
     )
   }
 }
